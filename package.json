@@ -1,0 +1,27 @@
+{
+  "name": "nodeheap",
+  "version": "0.0.1",
+  "author": "Seth <seth@flashgroup.com>",
+  "contributors": [ 
+    {
+      "name": "Seth",
+      "email": "seth@flashgroup.com"
+    } 
+  ],
+  "bin": {
+    "nodeheap": "./bin/nodeheap"
+  },
+  "scripts": {
+    "start": "node ./bin/nodeheap",
+     "test": "node ./bin/nodeheap -- test 8777"
+  },
+  "description": "simple line-based tcp client and server",
+  "homepage": "http://github.com/seth4618/nodeheap",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seth4618/nodeheap.git"
+  },
+  "keywords": ["node heap", "heap profiler", "memory leaks", "node object inspector"],
+  "engines" : { "node": ">=0.6" },
+  "main" : "lib/heapserver",
+}
