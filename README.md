@@ -9,19 +9,19 @@ CLI for inspecting the heap of a node application
 
 ## Usage
 
-   The program undertest needs to run a tcpserver which you get from:
+The program undertest needs to run a tcpserver which you get from:
 
    var heapserver = require('heapserver.js');	// include basic code
    heapserver(port);				// start heapserver on port 'port'
 
-   For example, in my code I define a runtime argument profileMemOn and profilePort and do the following:
+For example, in my code I define a runtime argument profileMemOn and profilePort and do the following:
 
    if (profileMemOn) {
        HeapServer = (/** @type {function (number, boolean=):?} */require('heapserver.js'));
        HeapServer(profilePort);
    }
 
-   Then to see what is going on run the command: 
+Then to see what is going on run the command: 
 
    nodeheap --port <port>
 
