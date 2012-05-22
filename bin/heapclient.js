@@ -12,7 +12,7 @@ var util=require('util');
 var stdin=process.stdin;
 var serverhost = "localhost";
 var serverport = 8777;
-var TCPClient = (/** @type {function (new:TCPClient, string, string, number, (function (): ?|undefined)): ?} */require('../../simpletcp').client());
+var TCPClient = (/** @type {function (new:TCPClient, string, string, number, (function (): ?|undefined)): ?} */require('simpletcp').client());
 var verbose = false;
 var testme = 0;
 
@@ -103,7 +103,25 @@ HeapClient.executeResponse = function(str)
         if (obj.command in HeapClient.responseProcessors) {
             HeapClient.responseProcessors[obj.command](obj);
         } else {
-            console.log(obj);
+            if (obj.status == 0) {
+                delete obj.status;
+                var keycnt = 0;
+                for (key in obj) {
+                    if (key == 'command') continue;
+                    keycnt++;
+                }
+                if (keycnt == 0) {
+                    output('', true);
+                } else {
+                    output(util.inspect(obj), true);
+                }
+            } else {
+                if ('msg' in obj) {
+                    output(obj.msg, true);
+                } else {
+                    output('Error processing command: '+util.inspect(obj), true);
+                }
+            }
         }
     } catch (err) {
         Util.error("Error processing a response: "+str);
@@ -133,14 +151,14 @@ HeapClient.makeRequest = function(data)
  **/
 HeapClient.serverDisabled = function()
 {
-    console.log('connection is now disabled');
+    output('Application disconnected, try login again.', true);
     HeapClient.enabled = false;
     delete HeapClient.connection;
 };
 
 HeapClient.login = function(str)
 {
-    if (HeapClient.enabled == true) console.log("Already enabled");
+    if (HeapClient.enabled == true) output("Already enabled", true);
     else HeapClient.init();
 };
 
@@ -167,7 +185,7 @@ HeapClient.info = function(str)
 {
     var p = str.split(' ');
     if (p.length != 3) {
-        console.log('error: info <type> <name> (type or name can be *)');
+        output('error: info <type> <name> (type or name can be *)', true);
         return;
     }
     var req = {command: 'info', type: p[1], name: p[2]};
@@ -180,7 +198,7 @@ HeapClient.chain = function(str)
 {
     var p = str.split(' ');
     if (p.length != 2) {
-        console.log('error: chain <id>');
+        output('error: chain <id>', true);
         return;
     }
     HeapClient.makeRequest({command: 'chain', id: p[1]});
@@ -189,12 +207,26 @@ HeapClient.chain = function(str)
 HeapClient.value = function(str)
 {
     var p = str.split(' ');
-    if ((p.length < 2)||(p.length > 3)) {
-        console.log('error: value <id> <depth>  (<depth> is optional)');
+    if ((p.length < 2)||(p.length > 4)) {
+        output('error: value <id> <depth> <hidden> (<depth> & <hidden> are optional)', true);
         return;
     } 
     var req = {command: 'v', id: p[1]};
-    if (p.length == 3) req.depth = p[2];
+    var depthIndex = 2;
+    if (p.length > 2) {
+        if (p[2].substr(0,1) == 'h') {
+            depthIndex = 3;
+            req.hidden = true;
+        }
+        if (p.length > depthIndex) {
+            req.depth = p[depthIndex];
+            if (!req.depth.match(/[0-9]+/)) {
+                output('error: value <id> <depth> <hidden> (<depth> & <hidden> are optional)', true);
+                return;
+            }
+        }
+        if ((p.length > (depthIndex+1)) && (p[depthIndex+1].substr(0,1) == 'h')) req.hidden = true;
+    }
     HeapClient.makeRequest(req);
 };
 
@@ -202,7 +234,7 @@ HeapClient.inspect = function(str)
 {
     var p = str.split(' ');
     if (p.length != 3) {
-        console.log('error: value <id> <path>');
+        output('error: value <id> <path>', true);
         return;
     } 
     var req = {command: 'v', id: p[1], path: p[2]};
@@ -271,18 +303,9 @@ HeapClient.responseProcessors['v'] = HeapClient.showValue;
 
 // process command line options
 
-var argv = process.argv;
-var i = 0;
+var argv = process.argv.splice(2);
 var len = argv.length;
 for (i=0; i<len; i++) {
-	var arg = argv[i];
-	if (arg.match(/.js$/)) {
-		progname = arg;
-		break;
-	}
-}
-i++;
-for (; i<len; i++) {
 	arg = argv[i];
     if (arg == "--port") {
         // connect to the specified port
@@ -310,6 +333,7 @@ for (; i<len; i++) {
 
 
 output('Welcome to the heap probe utility.\n');
+if (testme != 0) output("You are testing nodeheap on itself!\n");
 output('Will probe application running on '+serverhost+":"+serverport+"\n");
 output('\nuse "login" command when you are ready to connect to the application', true);
 
@@ -324,14 +348,14 @@ stdin.on('data',function(chunk){ // called on each line of input
         var func = HeapClient[first];
         func(line);
     } else {
-        console.log('Unknown command "'+line+'"');
+        output('Unknown command "'+line+'"', true);
     }
 }).on('end',function(){ // called when stdin closes (via ^D)
-    console.log('stdin:closed');
+    if (HeapClient.verbosity) console.log('stdin:closed');
 });
 
 if (testme != 0) {
-    HeapServer = (/** @type {function (number, boolean=):?} */require('./heapserver.js'));
+    HeapServer = (/** @type {function (number, boolean=):?} */require('../lib/heapserver.js'));
     HeapServer(testme);
 }
 
