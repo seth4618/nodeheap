@@ -11,13 +11,13 @@ CLI for inspecting the heap of a node application
 
 The program undertest needs to run a tcpserver which you get from:
 
-    var heapserver = require('heapserver.js');	// include basic code
+    var heapserver = require('nodeheap/lib/heapserver');	// include basic code
     heapserver(port);				// start heapserver on port 'port'
 
 For example, in my code I define a runtime argument profileMemOn and profilePort and do the following:
 
     if (profileMemOn) {
-        HeapServer = (/** @type {function (number, boolean=):?} */require('nodeheap'));
+        HeapServer = (/** @type {function (number, boolean=):?} */require('nodeheap/lib/heapserver'));
         HeapServer(profilePort);
     }
 
