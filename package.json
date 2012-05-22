@@ -12,8 +12,8 @@
     "nodeheap": "./bin/heapclient.js"
   },
  "dependencies": {
-    "simpletcp": ">= 0.1.x",
-    "v8-profiler": ">= 3.7.x"
+    "simpletcp": "git://github.com/seth4618/simpletcp.git#master",
+    "v8-profiler": "git://github.com/seth4618/v8-profiler#unstable"
   },
   "scripts": {
      "test": "node ./bin/heapclient.js -- test 8777"
@@ -26,5 +26,5 @@
   },
   "keywords": ["node heap", "heap profiler", "memory leaks", "node object inspector"],
   "engines" : { "node": ">=0.6" },
-  "main" : "lib/heapserver"
+  "main" : "lib/heapserver.js"
 }
