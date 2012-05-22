@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // Copyright (c) 2012, flashgroup, Inc.
 //#copyright
 //#process: jsc.sh --option "--create_name_map_files true --formatting PRETTY_PRINT" 
