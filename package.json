@@ -9,13 +9,16 @@
     } 
   ],
   "bin": {
-    "nodeheap": "./bin/nodeheap"
+    "nodeheap": "./bin/heapclient.js"
+  },
+ "dependencies": {
+    "simpletcp": ">= 0.1.x",
+    "v8-profiler": ">= 3.7.x"
   },
   "scripts": {
-    "start": "node ./bin/nodeheap",
-     "test": "node ./bin/nodeheap -- test 8777"
+     "test": "node ./bin/heapclient.js -- test 8777"
   },
-  "description": "simple line-based tcp client and server",
+  "description": "CLI to probe the heap of a node application",
   "homepage": "http://github.com/seth4618/nodeheap",
   "repository": {
     "type": "git",
@@ -23,5 +26,5 @@
   },
   "keywords": ["node heap", "heap profiler", "memory leaks", "node object inspector"],
   "engines" : { "node": ">=0.6" },
-  "main" : "lib/heapserver",
+  "main" : "lib/heapserver"
 }
