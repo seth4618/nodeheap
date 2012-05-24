@@ -12,7 +12,7 @@ var util=require('util');
 var stdin=process.stdin;
 var serverhost = "localhost";
 var serverport = 8777;
-var TCPClient = (/** @type {function (new:TCPClient, string, string, number, (function (): ?|undefined)): ?} */require('simpletcp').client());
+var TCPClient = (/** @type {function (new:TCPClient, string, string, number, (function (): ?|undefined)): ?} */require('simpletcp').jsonclient());
 var verbose = false;
 var testme = 0;
 
@@ -53,7 +53,7 @@ function HeapClient() {}
 /** @type {!TCPClient} */ HeapClient.connection;
 /** @type {boolean} */ HeapClient.enabled = false;
 /** @type {number} */ HeapClient.waitingId = 0;
-/** @type {boolean} */ HeapClient.verbosity = true;
+/** @type {boolean} */ HeapClient.verbosity = verbose;
 
 HeapClient.init = function() {
     var client = new TCPClient('hc', 
@@ -65,7 +65,7 @@ HeapClient.init = function() {
     client.on('data', HeapClient.executeResponse);
     client.on('end', HeapClient.serverDisabled);
     client.on('error', HeapClient.serverError);
-    HeapClient.verbosity = verbose;
+    client.setVerbose(HeapClient.verbosity);
     client.open();
 };
 
@@ -86,20 +86,15 @@ HeapClient.serverError = function(err)
     }
 };
 
-HeapClient.executeResponse = function(str)
+HeapClient.executeResponse = function(obj)
 {
     if (HeapClient.waitingId != 0) {
         clearTimeout(HeapClient.waitingId);
         HeapClient.waitingId = 0;
     }
 
-    if (str.indexOf('{') != 0) {
-        if (HeapClient.verbosity) console.log('malformed input: ['+str+']');
-        return;
-    }
-    if (HeapClient.verbosity) console.log("server responds with:"+str);
+    if (HeapClient.verbosity) console.log("server responds with:"+util.inspect(obj, 1));
     try {
-        var obj = JSON.parse(str);
         if (obj.command in HeapClient.responseProcessors) {
             HeapClient.responseProcessors[obj.command](obj);
         } else {
@@ -124,7 +119,7 @@ HeapClient.executeResponse = function(str)
             }
         }
     } catch (err) {
-        Util.error("Error processing a response: "+str);
+        Util.error("Error processing a response: "+obj);
         throw err;
     }
 };
@@ -138,7 +133,7 @@ HeapClient.responseWaiting = function()
 
 HeapClient.makeRequest = function(data)
 {
-    HeapClient.client.writeJSON(data);
+    HeapClient.client.write(data);
     HeapClient.waitingCount = 0;
     HeapClient.waitingId = setTimeout(HeapClient.responseWaiting, 1000);
     
@@ -254,7 +249,7 @@ HeapClient.verbose = function(str)
         }
     }
     HeapClient.verbosity = onoff;
-    output('Verbosity is '+(onoff ? 'verbose' : 'quiet'), true);
+    output('Verbosity is '+(HeapClient.verbosity ? 'verbose' : 'quiet'), true);
 };
 
 HeapClient.help = function(str)
