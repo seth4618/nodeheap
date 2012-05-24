@@ -1,6 +1,6 @@
 {
   "name": "nodeheap",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Seth <seth@flashgroup.com>",
   "contributors": [ 
     {
@@ -12,7 +12,7 @@
     "nodeheap": "./bin/heapclient.js"
   },
  "dependencies": {
-    "simpletcp": "git://github.com/seth4618/simpletcp.git#master",
+    "simpletcp": "0.0.x",
     "v8-profiler": "git://github.com/seth4618/v8-profiler#unstable"
   },
   "scripts": {
